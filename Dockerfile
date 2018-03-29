@@ -12,8 +12,9 @@ RUN yum install -y wget git unzip zip which \
 
 # jdk
 RUN  yum install -y java-1.8.0-openjdk
-
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.161-0.b14.el7_4.x86_64/
+RUN mkdir ${JAVA_HOME}/bin
+RUN ln -s /usr/bin/java ${JAVA_HOME}/bin/java
 # jce
 RUN yum install -y unzip && yum clean all \
  && cd /tmp \
