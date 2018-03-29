@@ -11,7 +11,7 @@ RUN yum install -y wget git unzip zip which \
  && yum clean all
 
 # jdk
-RUN su -c "yum install java-1.8.0-openjdk"
+RUN  yum install -y java-1.8.0-openjdk
 
 # jce
 RUN yum install -y unzip && yum clean all \
