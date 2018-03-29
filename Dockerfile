@@ -52,7 +52,7 @@ RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash - \
 ENV ELEPHANT_CONF_DIR ${ELEPHANT_CONF_DIR:-/usr/dr-elephant/app-conf}
 
 #ARG SPARK_VERSION
-ENV SPARK_VERSION ${SPARK_VERSION:-1.6.0}
+ENV SPARK_VERSION ${SPARK_VERSION:-2.1.1}
 
 #ARG HADOOP_VERSION
 ENV HADOOP_VERSION ${HADOOP_VERSION:-2.7.5}
