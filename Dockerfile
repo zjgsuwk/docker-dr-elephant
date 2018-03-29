@@ -11,12 +11,7 @@ RUN yum install -y wget git unzip zip which \
  && yum clean all
 
 # jdk
-RUN cd /tmp \
- && wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u151-b12/e758a0de34e24606bca991d704f6dcbf/jdk-8u151-linux-x64.rpm \
- && rpm -ivh jdk-*-linux-x64.rpm \
- && rm jdk-*-linux-x64.rpm
-ENV JAVA_HOME /usr/java/default
-ENV PATH $PATH:$JAVA_HOME/bin
+RUN su -c "yum install java-1.8.0-openjdk"
 
 # jce
 RUN yum install -y unzip && yum clean all \
