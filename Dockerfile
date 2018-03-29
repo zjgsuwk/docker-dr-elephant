@@ -33,13 +33,6 @@ RUN curl -O https://downloads.typesafe.com/play/2.2.2/play-2.2.2.zip \
   && chmod a+x /play-2.2.2/play
 ENV PATH $PATH:/play-2.2.2
 
-# NodeJS v6
-RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash - \
- && yum install -y gcc-c++ make \
- && yum install -y nodejs \
- && yum clean all \
- && echo '{ "allow_root": true }' > /root/.bowerrc
-
 # play
 # RUN curl -O http://downloads.typesafe.com/typesafe-activator/1.3.9/typesafe-activator-1.3.9.zip \
 #  && unzip typesafe-activator-1.3.9.zip -d / \
@@ -47,12 +40,49 @@ RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash - \
 #  && chmod a+x /activator-dist-1.3.9/bin/activator
 # ENV PATH $PATH:/activator-dist-1.3.9/bin
 
+# NodeJS v6
+RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash - \
+ && yum install -y gcc-c++ make \
+ && yum install -y nodejs \
+ && yum clean all \
+ && echo '{ "allow_root": true }' > /root/.bowerrc
+
 ## CONFIGURE ##
 
 ENV ELEPHANT_CONF_DIR ${ELEPHANT_CONF_DIR:-/usr/dr-elephant/app-conf}
 
 #ARG SPARK_VERSION
 ENV SPARK_VERSION ${SPARK_VERSION:-1.6.0}
+
+#ARG HADOOP_VERSION
+ENV HADOOP_VERSION ${HADOOP_VERSION:-2.7.5}
+
+#ARG HADOOP_HOME
+ENV HADOOP_HOME ${HADOOP_HOME:-/usr/share/hadoop}
+
+#ARG HADOOP_CONF_DIR
+ENV HADOOP_CONF_DIR ${HADOOP_CONF_DIR:-/etc/hadoop/conf}
+
+## SETUP HADOOP CLIENT ##
+
+RUN cd /tmp \
+ && wget http://apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz \
+ && mkdir -p $HADOOP_CONF_DIR \
+ && mkdir -p $HADOOP_HOME \
+ && tar xzf hadoop-$HADOOP_VERSION.tar.gz \
+ && mv      hadoop-$HADOOP_VERSION/* $HADOOP_HOME \
+ && rm -Rf  hadoop-$HADOOP_VERSION \
+ && rm -Rf  hadoop-$HADOOP_VERSION.tar.gz
+
+# Set Hadoop-related environment variables
+ENV YARN_HOME ${HADOOP_HOME}
+ENV HADOOP_MAPRED_HOME ${HADOOP_HOME}
+ENV HADOOP_COMMON_HOME ${HADOOP_HOME}
+ENV HADOOP_HDFS_HOME ${HADOOP_HOME}
+ENV HADOOP_PREFIX ${HADOOP_HOME}
+ENV HADOOP_COMMON_LIB_NATIVE_DIR ${HADOOP_PREFIX}/lib/native
+ENV HADOOP_OPTS "-Djava.library.path=$HADOOP_COMMON_LIB_NATIVE_DIR"
+ENV PATH $HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
 
 ## BUILD AND INSTALL ##
 
@@ -64,6 +94,7 @@ RUN git clone https://github.com/damienclaveau/dr-elephant.git /tmp/dr-elephant 
 ## && cp resolver.conf.template ./app-conf/resolver.conf \
  && echo "" >> ./build.sbt && echo "resolvers += \"scalaz-bintray\" at \"https://dl.bintray.com/scalaz/releases\"" >> ./build.sbt \
  && sed -i -e "s/clean\stest\scompile\sdist/clean compile dist/g"    ./compile.sh \
+ && sed -i -e "s/hadoop_version=.*/hadoop_version=$HADOOP_VERSION/g" ./compile.conf \
  && sed -i -e "s/spark_version=.*/spark_version=$SPARK_VERSION/g"    ./compile.conf \
  && ./compile.sh ./compile.conf \
  && cd /tmp/dr-elephant \
@@ -90,6 +121,6 @@ RUN cd /usr/dr-elephant \
 
 EXPOSE 8080
 
-VOLUME $ELEPHANT_CONF_DIR  /usr/dr-elephant/logs
+VOLUME $ELEPHANT_CONF_DIR $HADOOP_CONF_DIR /usr/dr-elephant/logs
 
 CMD ["/usr/dr-elephant/bin/start.sh"]
