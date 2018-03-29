@@ -11,10 +11,9 @@ RUN yum install -y wget git unzip zip which \
  && yum clean all
 
 # jdk
-RUN  yum install -y java-1.8.0-openjdk
+RUN  yum install -y java-1.8.0-openjdk-devel
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.161-0.b14.el7_4.x86_64/
-RUN mkdir ${JAVA_HOME}/bin
-RUN ln -s /usr/bin/java ${JAVA_HOME}/bin/java
+
 # jce
 RUN yum install -y unzip && yum clean all \
  && cd /tmp \
@@ -33,6 +32,13 @@ RUN curl -O https://downloads.typesafe.com/play/2.2.2/play-2.2.2.zip \
   && rm play-2.2.2.zip \
   && chmod a+x /play-2.2.2/play
 ENV PATH $PATH:/play-2.2.2
+
+# NodeJS v6
+RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash - \
+ && yum install -y gcc-c++ make \
+ && yum install -y nodejs \
+ && yum clean all \
+ && echo '{ "allow_root": true }' > /root/.bowerrc
 
 # play
 # RUN curl -O http://downloads.typesafe.com/typesafe-activator/1.3.9/typesafe-activator-1.3.9.zip \
