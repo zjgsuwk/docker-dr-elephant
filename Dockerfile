@@ -66,16 +66,6 @@ ENV HADOOP_HOME ${HADOOP_HOME:-/usr/share/hadoop}
 ENV HADOOP_CONF_DIR ${HADOOP_CONF_DIR:-/etc/hadoop/conf}
 
 ## SETUP HADOOP CLIENT ##
-
-RUN cd /tmp \
- && wget http://apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz \
- && mkdir -p $HADOOP_CONF_DIR \
- && mkdir -p $HADOOP_HOME \
- && tar xzf hadoop-$HADOOP_VERSION.tar.gz \
- && mv      hadoop-$HADOOP_VERSION/* $HADOOP_HOME \
- && rm -Rf  hadoop-$HADOOP_VERSION \
- && rm -Rf  hadoop-$HADOOP_VERSION.tar.gz
-
 # Set Hadoop-related environment variables
 ENV YARN_HOME ${HADOOP_HOME}
 ENV HADOOP_MAPRED_HOME ${HADOOP_HOME}
@@ -90,19 +80,11 @@ ENV PATH $HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
 
 ENV ELEPHANT_VERSION 2.0.13
 
-RUN git clone https://github.com/damienclaveau/dr-elephant.git /tmp/dr-elephant \
+RUN git clone https://github.com/linkedin/dr-elephant.git /tmp/dr-elephant \
  && cd /tmp/dr-elephant \
-## && git checkout tags/$ELEPHANT_VERSION
-## && cp resolver.conf.template ./app-conf/resolver.conf \
- && echo "" >> ./build.sbt && echo "resolvers += \"scalaz-bintray\" at \"https://dl.bintray.com/scalaz/releases\"" >> ./build.sbt \
- && sed -i -e "s/clean\stest\scompile\sdist/clean compile dist/g"    ./compile.sh \
  && sed -i -e "s/hadoop_version=.*/hadoop_version=$HADOOP_VERSION/g" ./compile.conf \
  && sed -i -e "s/spark_version=.*/spark_version=$SPARK_VERSION/g"    ./compile.conf \
  && ./compile.sh ./compile.conf \
- && cd /tmp/dr-elephant \
- && unzip ./dist/dr-elephant-$ELEPHANT_VERSION.zip -d /usr \
- && ln -s  /usr/dr-elephant-$ELEPHANT_VERSION /usr/dr-elephant \
- && rm -Rf /tmp/dr-elephant
 
 ## CONFIGURE ##
 
