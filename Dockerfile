@@ -80,7 +80,7 @@ ENV PATH $HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
 
 ENV ELEPHANT_VERSION 2.0.13
 
-RUN git clone https://github.com/linkedin/dr-elephant.git /tmp/dr-elephant \
+RUN git clone https://github.com/linkedin/dr-elephant.git -b customSHSWork /tmp/dr-elephant \
  && cd /tmp/dr-elephant \
  && sed -i -e "s/hadoop_version=.*/hadoop_version=$HADOOP_VERSION/g" ./compile.conf \
  && sed -i -e "s/spark_version=.*/spark_version=$SPARK_VERSION/g"    ./compile.conf \
